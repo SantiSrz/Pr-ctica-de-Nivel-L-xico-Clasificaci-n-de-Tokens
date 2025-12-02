@@ -20,7 +20,7 @@ public class MiniLexer {
         }
 
         public String toString() {
-            return "Token: <" + tipo + ", \"" + lexema + "\">";
+            return "Token: '" + lexema +"' -> de tipo: " + tipo;
         }
     }
 
