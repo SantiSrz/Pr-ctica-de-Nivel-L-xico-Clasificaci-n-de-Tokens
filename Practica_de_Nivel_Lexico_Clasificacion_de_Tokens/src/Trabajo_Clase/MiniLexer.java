@@ -33,7 +33,6 @@ public class MiniLexer {
     	System.out.println("Inserta tu codigo: ");
         ejemplo = sc.nextLine();
         String[] separacion = ejemplo.split(" ");
-
         Token[] tokens = new Token[separacion.length];
 
         int index = 0;
