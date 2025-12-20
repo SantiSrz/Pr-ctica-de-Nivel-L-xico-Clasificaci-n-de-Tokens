@@ -5,6 +5,10 @@ import Trabajo_Clase.MiniLexer.Token;
 
 public class MiniParser {
 	
+	String[] nombres;
+	String[] tipos;
+	boolean[] inicializada;
+	int contador;
 	Token[] tokens;
 	int actual;
 	
@@ -12,6 +16,10 @@ public class MiniParser {
 		
 		this.tokens = tokens;
 		this.actual = 0;
+		this.nombres = new String[10];
+		this.tipos = new String[10];
+		this.inicializada = new boolean[10];
+		this.contador = 0;
 		
 	}
 	
@@ -34,13 +42,27 @@ public class MiniParser {
 	
 	public void parseStmt() {
 		Token n = this.tokens[this.actual];
-		if (n.lexema.equals("print")) {
+		if (n.lexema.equals("int")) {
+			match(TipoToken.PALABRA_CLAVE);
+			String nombreVariable = this.tokens[this.actual].lexema;
+			match(TipoToken.IDENTIFICADOR);
+			registrarDeclaracion(nombreVariable, "int");
+			match(TipoToken.DELIMITADOR);
+		}else if (n.lexema.equals("print")) {
 			match(TipoToken.PALABRA_CLAVE);
 			match(TipoToken.DELIMITADOR);
 			parseExpr();
 			match(TipoToken.DELIMITADOR);
 			match(TipoToken.DELIMITADOR);
 		}else if (n.tipo == TipoToken.IDENTIFICADOR){
+			String nombreVariable = n.lexema;
+			int indice = buscarVariable(nombreVariable);
+			if (indice == -1) {
+	            System.out.println("Error, la variable " + nombreVariable + " no ha sido declarada");
+	            System.exit(1);
+	        } else {
+	            this.inicializada[indice] = true;
+	        }
 			match(TipoToken.IDENTIFICADOR);
 			match(TipoToken.OPERADOR);
 			parseExpr();
@@ -80,6 +102,16 @@ public class MiniParser {
 	    }
 		Token g = this.tokens[this.actual];
 		if (g.tipo == TipoToken.IDENTIFICADOR) {
+			String nombreVar = g.lexema;
+			int indice = buscarVariable(nombreVar);
+			if (indice == -1) {
+	            System.out.println("Error Semántico: La variable '" + nombreVar + "' no ha sido declarada.");
+	            System.exit(1);
+	        }
+			if (this.inicializada[indice] == false) {
+	            System.out.println("Error Semántico: La variable '" + nombreVar + "' ha sido declarada pero NO inicializada. No se puede usar aún.");
+	            System.exit(1);
+	        }
 			match(TipoToken.IDENTIFICADOR);
 		}else if (g.tipo == TipoToken.LITERAL_NUMERICO) {
 			match(TipoToken.LITERAL_NUMERICO);
@@ -91,5 +123,21 @@ public class MiniParser {
 			System.out.println("Error, se esperaba un " + TipoToken.IDENTIFICADOR + " un " + TipoToken.LITERAL_NUMERICO + " o un '(' ");
 	        System.exit(1);
 		}
+	}
+	
+	public void registrarDeclaracion(String nombre, String tipo) {
+		this.nombres[this.contador] = nombre;
+	    this.tipos[this.contador] = tipo;
+	    this.inicializada[this.contador] = false;
+	    this.contador++;
+	}
+	
+	public int buscarVariable(String nombre) {
+		for(int i = 0; i < this.contador; i++) {
+			if (this.nombres[i].equals(nombre)) {
+				return i;
+			}
+		}
+		return -1;
 	}
 }
